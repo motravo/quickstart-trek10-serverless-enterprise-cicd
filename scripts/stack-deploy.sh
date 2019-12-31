@@ -1,4 +1,6 @@
 #!/bin/bash
+# Navigate to the root of the repository and run:
+# bash scripts/stack-deploy.sh
 # Requires AWS CLI: https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html
 
 ####### IMPORTANT #######

@@ -1,4 +1,6 @@
 #!/bin/bash
+# Navigate to the root of the repository and run:
+# bash scripts/git-setup.sh
 # Requires AWS CLI: https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html
 
 set -euo pipefail
