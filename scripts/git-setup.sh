@@ -4,7 +4,7 @@
 set -euo pipefail
 
 # Variables:
-source deployment-variables.sh
+source scripts/deployment-variables.sh
 
 # Get parameters from stack
 USER=$(aws cloudformation describe-stacks --stack-name ${STACK_NAME} --query "Stacks[*].Outputs[?OutputKey=='IAMUserName'].OutputValue" --output text)

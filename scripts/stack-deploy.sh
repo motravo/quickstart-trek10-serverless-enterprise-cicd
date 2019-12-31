@@ -1,10 +1,14 @@
 #!/bin/bash
 # Requires AWS CLI: https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html
 
+####### IMPORTANT #######
+# This script is not required by the quick start. 
+# It is included as an alternative way to deploy this quick start.
+
 set -euo pipefail
 
 # Variables:
-source deployment-variables.sh
+source scripts/deployment-variables.sh
 
 # Create S3 bucket for CloudFormation sub-templates
 echo "Creating S3 bucket and uploading sub-templates"
