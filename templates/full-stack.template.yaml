@@ -107,6 +107,7 @@ Resources:
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
         ArtifactBucket: !GetAtt AccountStack.Outputs.PipelineArtifactBucket
         SamTranslationBucket: !GetAtt AccountStack.Outputs.SamTranslationBucket
+        ParentStackName: !Ref AWS::StackName
       TemplateURL: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/lambda.template.yaml
       TimeoutInMinutes: 60
 
