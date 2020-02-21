@@ -1,9 +1,6 @@
 const AWS = require('aws-sdk');
 const docClient = new AWS.DynamoDB.DocumentClient({ apiVersion: '2012-08-10' });
 var secretsmanager = new AWS.SecretsManager();
-var logger = require('logger').createLogger();
-
-logger.setLevel('debug');
 
 function getSecrets() {
     var params = {
@@ -18,27 +15,27 @@ var secretdata;
 exports.sample = async (event, context, callback) => {
     const id = event.pathParameters.id;
     const httpMethod = event.httpMethod;
-    logger.info(`id: ${id}`)
-    logger.info(`httpMethod: ${httpMethod}`)
+    console.info(`id: ${id}`)
+    console.info(`httpMethod: ${httpMethod}`)
     if (secretdata) {
-        logger.debug('secrets retrieved from cache');
+        console.debug('secrets retrieved from cache');
     } else {
         secretdata = (await getSecrets()).SecretString;
-        logger.debug('secrets retrieved from secret in master account');
+        console.debug('secrets retrieved from secret in master account');
     }
     if (httpMethod === 'GET') {
-        logger.info(`inside get`)
+        console.info(`inside get`)
         const value = await sampleGet(id);
-        logger.info(`value: ${JSON.stringify(value, null, '\t')}`)
+        console.info(`value: ${JSON.stringify(value, null, '\t')}`)
         const response = apiGatewayResponse(200, value);
-        logger.info(`response: ${JSON.stringify(response, null, '\t')}`)
+        console.info(`response: ${JSON.stringify(response, null, '\t')}`)
         callback(null, response);
     } else if (httpMethod === 'POST') {
-        logger.info(`inside post`)
+        console.info(`inside post`)
         const value = await samplePost(id, event);
-        logger.info(`value: ${JSON.stringify(value, null, '\t')}`)
+        console.info(`value: ${JSON.stringify(value, null, '\t')}`)
         const response = apiGatewayResponse(200, value);
-        logger.info(`response: ${JSON.stringify(response, null, '\t')}`)
+        console.info(`response: ${JSON.stringify(response, null, '\t')}`)
         callback(null, response);
     } else {
         callback(new Error('not called via APIG GET or POST. Did you try testing this from the Lambda Console? Read the comments in code.'))
@@ -57,7 +54,7 @@ function sampleGet(key) {
 }
 
 function samplePost(key, event) {
-    logger.info(`event: ${JSON.stringify(event, null, '\t')}`);
+    console.info(`event: ${JSON.stringify(event, null, '\t')}`);
     var params = {
         TableName: process.env.TABLE_NAME,
         Item: {

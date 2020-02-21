@@ -14,7 +14,6 @@
   },
   "author": "Trek10",
   "devDependencies": {
-    "aws-sdk": "^2.298.0",
-    "logger": "^0.0.1"
+    "aws-sdk": "^2.298.0"
   }
 }

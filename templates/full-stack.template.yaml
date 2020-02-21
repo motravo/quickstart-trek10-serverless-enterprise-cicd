@@ -63,7 +63,7 @@ Parameters:
   BuildImageName:
     Description: Docker image for application build
     Type: String
-    Default: aws/codebuild/nodejs:10.1.0
+    Default: lambci/lambda:build-nodejs12.x	
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
     ConstraintDescription: Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).
