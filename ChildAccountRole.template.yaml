@@ -44,6 +44,7 @@ Resources:
             - cloudformation:DeleteStack
             - cloudformation:DescribeStacks
             - cloudformation:DeleteStack
+            - cloudformation:UpdateStack
             Resource: "*"
           - Effect: Allow
             Action:

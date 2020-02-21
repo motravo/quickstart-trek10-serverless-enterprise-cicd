@@ -98,6 +98,7 @@ Resources:
         ZipFile: |
           import os, boto3, json, signal, traceback
           from botocore.vendored import requests
+          from botocore.exceptions import ClientError
 
           def get_cfn_parameters(e):
               params = []
@@ -125,6 +126,7 @@ Resources:
               except ClientError as er:
                 if "No updates are to be performed" not in str(er):
                     raise
+                return e["PhysicalResourceId"]
               waiter = cf_client.get_waiter('stack_update_complete')
               waiter.wait(StackName=e["PhysicalResourceId"])
               return response['StackId']
