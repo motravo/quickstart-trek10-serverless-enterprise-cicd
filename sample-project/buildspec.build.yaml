@@ -4,6 +4,9 @@ env:
     DIST_FOLDER: "dist"
     BUILD_ENV: "dev"
 phases:
+  install:
+    runtime-versions:
+      nodejs: 12
   pre_build:
     commands:
       - echo "Install dependencies"
