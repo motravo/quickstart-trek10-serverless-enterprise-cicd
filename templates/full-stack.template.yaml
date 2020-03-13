@@ -63,7 +63,7 @@ Parameters:
   BuildImageName:
     Description: Docker image for application build
     Type: String
-    Default: aws/codebuild/nodejs:10.1.0
+    Default: aws/codebuild/amazonlinux2-x86_64-standard:2.0
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
     ConstraintDescription: Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).
@@ -107,6 +107,7 @@ Resources:
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
         ArtifactBucket: !GetAtt AccountStack.Outputs.PipelineArtifactBucket
         SamTranslationBucket: !GetAtt AccountStack.Outputs.SamTranslationBucket
+        ParentStackName: !Ref AWS::StackName
       TemplateURL: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/lambda.template.yaml
       TimeoutInMinutes: 60
 
