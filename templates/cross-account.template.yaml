@@ -35,7 +35,7 @@ Resources:
         Stage: !Ref Stage
       Capabilities:
         - CAPABILITY_NAMED_IAM
-      TemplateBody: |
+      TemplateBody: 
         AWSTemplateFormatVersion: '2010-09-09'
 
         Parameters:
