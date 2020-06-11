@@ -220,7 +220,7 @@ Resources:
         ProdAwsAccountId: !Ref ProdAwsAccountId
         AppName: !Ref AppName
         DynamicPipelineCleanupLambdaArn: !GetAtt 
-          - LambdaStack.
+          - LambdaStack
           - Outputs.DynamicPipelineCleanupLambda
         BuildImageName: !Ref BuildImageName
         ArtifactBucketKeyArn: !GetAtt 
