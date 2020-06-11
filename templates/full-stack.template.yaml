@@ -26,6 +26,7 @@ Metadata:
           default: AWS Quick Start configuration
         Parameters:
           - QSS3BucketName
+          - QSS3BucketRegion
           - QSS3KeyPrefix
     ParameterLabels:
       AppName:
@@ -42,6 +43,8 @@ Metadata:
         default: Build image
       QSS3BucketName:
         default: Quick Start S3 bucket name
+      QSS3BucketRegion:
+        default: Quick Start S3 bucket region
       QSS3KeyPrefix:
         default: Quick Start S3 key prefix
 
@@ -70,6 +73,10 @@ Parameters:
     Default: aws-quickstart
     Description: S3 bucket name for the Quick Start assets. This string can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)
     Type: String
+  QSS3BucketRegion:
+    Default: 'us-east-1'
+    Description: 'The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.'
+    Type: String
   QSS3KeyPrefix:
     AllowedPattern: "^[0-9a-zA-Z-/]*$"
     ConstraintDescription: AWS Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/). It cannot start with forward slash (/) because that is automatically appended.
@@ -85,6 +92,9 @@ Parameters:
     Type: String
     Default: ChildAccountRole
 
+Conditions:
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
+
 Resources:
   AccountStack:
     Type: AWS::CloudFormation::Stack
@@ -92,7 +102,13 @@ Resources:
       Parameters:
         DevAwsAccountId: !Ref DevAwsAccountId
         ProdAwsAccountId: !Ref ProdAwsAccountId
-      TemplateURL: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/account.template.yaml
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3BucketRegion: !Ref QSS3BucketRegion
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+      TemplateURL: !Sub 
+        - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/account.template.yaml
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       TimeoutInMinutes: 60
 
   LambdaStack:
@@ -101,13 +117,23 @@ Resources:
       Parameters:
         DevAwsAccountId: !Ref DevAwsAccountId
         ProdAwsAccountId: !Ref ProdAwsAccountId
-        PipelineServiceRoleArn: !GetAtt AccountStack.Outputs.PipelineServiceRoleArn
+        PipelineServiceRoleArn: !GetAtt 
+          - AccountStack
+          - Outputs.PipelineServiceRoleArn
         AppName: !Ref AppName
         QSS3BucketName: !Ref QSS3BucketName
+        QSS3BucketRegion: !Ref QSS3BucketRegion
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
-        ArtifactBucket: !GetAtt AccountStack.Outputs.PipelineArtifactBucket
-        SamTranslationBucket: !GetAtt AccountStack.Outputs.SamTranslationBucket
-      TemplateURL: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/lambda.template.yaml
+        ArtifactBucket: !GetAtt 
+          - AccountStack
+          - Outputs.PipelineArtifactBucket
+        SamTranslationBucket: !GetAtt 
+          - AccountStack
+          - Outputs.SamTranslationBucket
+      TemplateURL: !Sub 
+        - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/lambda.template.yaml 
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]      
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       TimeoutInMinutes: 60
 
   CrossAccountStackDev:
@@ -115,10 +141,18 @@ Resources:
     Properties:
       Parameters:
         AwsAccountId: !Ref DevAwsAccountId
-        QuickStartStackMakerLambda: !GetAtt LambdaStack.Outputs.QuickStartStackMakerLambda
+        QuickStartStackMakerLambda: !GetAtt 
+          - LambdaStack
+          - Outputs.QuickStartStackMakerLambda
         Stage: dev
         ChildAccountRoleName: !Ref DevChildAccountRoleName
-      TemplateURL: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/cross-account.template.yaml
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3BucketRegion: !Ref QSS3BucketRegion
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+      TemplateURL: !Sub 
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/cross-account.template.yaml'
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       TimeoutInMinutes: 60
 
   CrossAccountStackProd:
@@ -126,10 +160,18 @@ Resources:
     Properties:
       Parameters:
         AwsAccountId: !Ref ProdAwsAccountId
-        QuickStartStackMakerLambda: !GetAtt LambdaStack.Outputs.QuickStartStackMakerLambda
+        QuickStartStackMakerLambda: !GetAtt 
+          - LambdaStack
+          - Outputs.QuickStartStackMakerLambda
         Stage: prod
         ChildAccountRoleName: !Ref ProdChildAccountRoleName
-      TemplateURL: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/cross-account.template.yaml
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3BucketRegion: !Ref QSS3BucketRegion
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/cross-account.template.yaml'
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       TimeoutInMinutes: 60
 
   ProjectSetupStack:
@@ -142,14 +184,32 @@ Resources:
         DevAwsAccountId: !Ref DevAwsAccountId
         ProdAwsAccountId: !Ref ProdAwsAccountId
         AppName: !Ref AppName
-        DynamicPipelineMakerLambdaArn: !GetAtt LambdaStack.Outputs.DynamicPipelineMakerLambda
-        CodecommitCredentialsLambdaArn: !GetAtt LambdaStack.Outputs.CodecommitCredentialsLambda
+        DynamicPipelineMakerLambdaArn: !GetAtt 
+          - LambdaStack
+          - Outputs.DynamicPipelineMakerLambda
+        CodecommitCredentialsLambdaArn: !GetAtt 
+          - LambdaStack
+          - Outputs.CodecommitCredentialsLambda
         BuildImageName: !Ref BuildImageName
-        ArtifactBucket: !GetAtt AccountStack.Outputs.PipelineArtifactBucket
-        ArtifactBucketKeyArn: !GetAtt AccountStack.Outputs.ArtifactBucketKeyArn
-        SamTranslationBucket: !GetAtt AccountStack.Outputs.SamTranslationBucket
-        PipelineServiceRoleArn: !GetAtt AccountStack.Outputs.PipelineServiceRoleArn
-      TemplateURL: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/project.template.yaml
+        ArtifactBucket: !GetAtt 
+          - AccountStack
+          - Outputs.PipelineArtifactBucket
+        ArtifactBucketKeyArn: !GetAtt 
+          - AccountStack
+          - Outputs.ArtifactBucketKeyArn
+        SamTranslationBucket: !GetAtt 
+        - AccountStack
+        - Outputs.SamTranslationBucket
+        PipelineServiceRoleArn: !GetAtt 
+        - AccountStack
+        - Outputs.PipelineServiceRoleArn
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3BucketRegion: !Ref QSS3BucketRegion
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+      TemplateURL: !Sub 
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/project.template.yaml'
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       TimeoutInMinutes: 60
 
   ProjectPipelineStack:
@@ -159,40 +219,80 @@ Resources:
         DevAwsAccountId: !Ref DevAwsAccountId
         ProdAwsAccountId: !Ref ProdAwsAccountId
         AppName: !Ref AppName
-        DynamicPipelineCleanupLambdaArn: !GetAtt LambdaStack.Outputs.DynamicPipelineCleanupLambda
+        DynamicPipelineCleanupLambdaArn: !GetAtt 
+          - LambdaStack.
+          - Outputs.DynamicPipelineCleanupLambda
         BuildImageName: !Ref BuildImageName
-        ArtifactBucketKeyArn: !GetAtt AccountStack.Outputs.ArtifactBucketKeyArn
-        ArtifactBucket: !GetAtt AccountStack.Outputs.PipelineArtifactBucket
-        SamTranslationBucket: !GetAtt AccountStack.Outputs.SamTranslationBucket
-        PipelineServiceRoleArn: !GetAtt AccountStack.Outputs.PipelineServiceRoleArn
-        SecretArnDev: !GetAtt ProjectSetupStack.Outputs.SecretArnDev
-        SecretArnProd: !GetAtt ProjectSetupStack.Outputs.SecretArnProd
-        SecretsManagerKey: !GetAtt ProjectSetupStack.Outputs.SecretsManagerKey
-      TemplateURL: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/pipeline.template.yaml
+        ArtifactBucketKeyArn: !GetAtt 
+          - AccountStack
+          - Outputs.ArtifactBucketKeyArn
+        ArtifactBucket: !GetAtt 
+          - AccountStack
+          - Outputs.PipelineArtifactBucket
+        SamTranslationBucket: !GetAtt 
+          - AccountStack
+          - Outputs.SamTranslationBucket
+        PipelineServiceRoleArn: !GetAtt 
+          - AccountStack
+          - Outputs.PipelineServiceRoleArn
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3BucketRegion: !Ref QSS3BucketRegion
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+        SecretArnDev: !GetAtt 
+          - ProjectSetupStack
+          - Outputs.SecretArnDev
+        SecretArnProd: !GetAtt 
+          - ProjectSetupStack
+          - Outputs.SecretArnProd
+        SecretsManagerKey: !GetAtt 
+          - ProjectSetupStack
+          - Outputs.SecretsManagerKey
+      TemplateURL: !Sub 
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/pipeline.template.yaml'
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       TimeoutInMinutes: 60
 
   CleanUpSamBuckets:
     Type: AWS::CloudFormation::CustomResource
     Properties:
-      ServiceToken: !GetAtt LambdaStack.Outputs.CleanUpBucketsLambda
-      Bucket: !GetAtt AccountStack.Outputs.SamTranslationBucket
+      ServiceToken: !GetAtt 
+        - LambdaStack
+        - Outputs.CleanUpBucketsLambda
+      Bucket: !GetAtt 
+        - AccountStack
+        - Outputs.SamTranslationBucket
 
   CleanUpArtifactBuckets:
     Type: AWS::CloudFormation::CustomResource
     Properties:
-      ServiceToken: !GetAtt LambdaStack.Outputs.CleanUpBucketsLambda
-      Bucket: !GetAtt AccountStack.Outputs.PipelineArtifactBucket
+      ServiceToken: !GetAtt 
+        - LambdaStack
+        - Outputs.CleanUpBucketsLambda
+      Bucket: !GetAtt 
+        - AccountStack
+        - Outputs.PipelineArtifactBucket
 
 Outputs:
   RepoCloneUrlSsh:
-    Value: !GetAtt ProjectSetupStack.Outputs.RepoCloneUrlSsh
+    Value: !GetAtt 
+      - ProjectSetupStack
+      - Outputs.RepoCloneUrlSsh
   RepoCloneUrlHttp:
-    Value: !GetAtt ProjectSetupStack.Outputs.RepoCloneUrlHttp
+    Value: !GetAtt 
+      - ProjectSetupStack
+      - Outputs.RepoCloneUrlHttp
   IAMUserName:
-    Value: !GetAtt ProjectSetupStack.Outputs.IAMUserName
+    Value: !GetAtt 
+      - ProjectSetupStack
+      - Outputs.IAMUserName
   GitUserName:
     Description: Username for access to the CodeCommit repository
-    Value: !GetAtt ProjectSetupStack.Outputs.GitUserName
+    Value: !GetAtt 
+      - ProjectSetupStack
+      - Outputs.GitUserName
   GitPassword:
     Description: Password for access to the CodeCommit repository
-    Value: !GetAtt ProjectSetupStack.Outputs.GitPassword
+    Value: !GetAtt 
+      - ProjectSetupStack
+      - Outputs.GitPassword
