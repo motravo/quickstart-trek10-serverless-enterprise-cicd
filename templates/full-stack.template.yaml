@@ -102,9 +102,6 @@ Resources:
       Parameters:
         DevAwsAccountId: !Ref DevAwsAccountId
         ProdAwsAccountId: !Ref ProdAwsAccountId
-        QSS3BucketName: !Ref QSS3BucketName
-        QSS3BucketRegion: !Ref QSS3BucketRegion
-        QSS3KeyPrefix: !Ref QSS3KeyPrefix
       TemplateURL: !Sub 
         - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/account.template.yaml
         - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
@@ -146,9 +143,6 @@ Resources:
           - Outputs.QuickStartStackMakerLambda
         Stage: dev
         ChildAccountRoleName: !Ref DevChildAccountRoleName
-        QSS3BucketName: !Ref QSS3BucketName
-        QSS3BucketRegion: !Ref QSS3BucketRegion
-        QSS3KeyPrefix: !Ref QSS3KeyPrefix
       TemplateURL: !Sub 
         - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/cross-account.template.yaml'
         - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
@@ -165,9 +159,6 @@ Resources:
           - Outputs.QuickStartStackMakerLambda
         Stage: prod
         ChildAccountRoleName: !Ref ProdChildAccountRoleName
-        QSS3BucketName: !Ref QSS3BucketName
-        QSS3BucketRegion: !Ref QSS3BucketRegion
-        QSS3KeyPrefix: !Ref QSS3KeyPrefix
       TemplateURL: !Sub
         - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/cross-account.template.yaml'
         - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
@@ -203,9 +194,6 @@ Resources:
         PipelineServiceRoleArn: !GetAtt 
         - AccountStack
         - Outputs.PipelineServiceRoleArn
-        QSS3BucketName: !Ref QSS3BucketName
-        QSS3BucketRegion: !Ref QSS3BucketRegion
-        QSS3KeyPrefix: !Ref QSS3KeyPrefix
       TemplateURL: !Sub 
         - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/project.template.yaml'
         - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
@@ -235,9 +223,6 @@ Resources:
         PipelineServiceRoleArn: !GetAtt 
           - AccountStack
           - Outputs.PipelineServiceRoleArn
-        QSS3BucketName: !Ref QSS3BucketName
-        QSS3BucketRegion: !Ref QSS3BucketRegion
-        QSS3KeyPrefix: !Ref QSS3KeyPrefix
         SecretArnDev: !GetAtt 
           - ProjectSetupStack
           - Outputs.SecretArnDev
