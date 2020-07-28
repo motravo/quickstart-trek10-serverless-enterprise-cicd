@@ -396,6 +396,10 @@ Resources:
   DynamicPipelineMakerLambda:
     Type: AWS::Lambda::Function
     Properties:
+      Parameters:
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3BucketRegion: !Ref QSS3BucketRegion
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
       Handler: index.lambda_handler
       MemorySize: 128
       Runtime: python3.6
