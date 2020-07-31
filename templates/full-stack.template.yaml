@@ -118,6 +118,7 @@ Resources:
           - AccountStack
           - Outputs.PipelineServiceRoleArn
         AppName: !Ref AppName
+        ParentStackName: !Ref AWS::StackName
         QSS3BucketName: !Ref QSS3BucketName
         QSS3BucketRegion: !Ref QSS3BucketRegion
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
