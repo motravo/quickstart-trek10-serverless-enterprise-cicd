@@ -45,6 +45,9 @@ Parameters:
   SamTranslationBucket:
     Description: S3 bucket for SAM translations
     Type: String
+  ParentStackName:
+    Description: The name of the Parent Stack
+    Type: String
 
 Conditions:
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
@@ -102,6 +105,7 @@ Resources:
         ZipFile: |
           import os, boto3, json, signal, traceback
           from botocore.vendored import requests
+          from botocore.exceptions import ClientError
 
           def get_cfn_parameters(e):
               params = []
@@ -129,6 +133,7 @@ Resources:
               except ClientError as er:
                 if "No updates are to be performed" not in str(er):
                     raise
+                return e["PhysicalResourceId"]
               waiter = cf_client.get_waiter('stack_update_complete')
               waiter.wait(StackName=e["PhysicalResourceId"])
               return response['StackId']
@@ -360,7 +365,7 @@ Resources:
               - cloudformation:CreateStack
               - cloudformation:DescribeStacks
               - cloudformation:DeleteStack
-            Resource: !Sub arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${AWS::StackName}-ProjectPipelineStack-branch-*/*
+            Resource: !Sub arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${ParentStackName}*/*
           - Effect: Allow
             Action:
               - codebuild:CreateProject
@@ -382,7 +387,7 @@ Resources:
               - codepipeline:GetPipeline
               - codepipeline:GetPipelineState
               - codepipeline:DeletePipeline
-            Resource: !Sub arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:${AWS::StackName}-ProjectPipelineStack-branch-*
+            Resource: !Sub arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:${ParentStackName}*
           - Effect: Allow
             Action:
               - lambda:InvokeFunction
@@ -408,7 +413,7 @@ Resources:
             - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/pipeline.template.yaml
             - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
               S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-          StackName: !Ref AWS::StackName
+          StackName: !Ref ParentStackName
           DynamicPipelineCleanupLambdaArn: !GetAtt DynamicPipelineCleanupLambda.Arn
       Code:
         ZipFile: |
@@ -431,7 +436,7 @@ Resources:
 
           def sanitize_branch_name(branch):
               suffix = re.sub('[^0-9a-zA-Z]+', '-', branch)
-              StackName = '{}-ProjectPipelineStack-branch-{}'.format(os.environ['StackName'], suffix)
+              StackName = '{}-PPS-branch-{}'.format(os.environ['StackName'], suffix)[:127]
               return suffix, StackName
 
           def create_pipeline_stack(branch, customParameters):
