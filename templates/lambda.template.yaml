@@ -99,14 +99,15 @@ Resources:
       Handler: index.lambda_handler
       MemorySize: 128
       Role: !GetAtt QuickStartStackMakerLambdaRole.Arn
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 900
       Code:
         ZipFile: |
           import os, boto3, json, signal, traceback
-          from botocore.vendored import requests
+          import urllib3
           from botocore.exceptions import ClientError
 
+          http = urllib3.PoolManager()
           def get_cfn_parameters(e):
               params = []
               cfnp = e['ResourceProperties']['CfnParameters']
@@ -197,10 +198,10 @@ Resources:
                   'content-length': str(len(rb))
               }
               try:
-                  response = requests.put(e['ResponseURL'], data=rb, headers=headers)
+                  response = http.request("PUT", e['ResponseURL'], body=rb, headers=headers)
                   print("CF returned status code: " + response.reason)
               except Exception as e:
-                  print("send(..) failed executing requests.put(..): " + str(e))
+                  print("send(..) failed executing urllib3.request(): " + str(e))
                   raise
 
           def timeout_handler(_signal, _frame):
@@ -243,7 +244,7 @@ Resources:
     Properties:
       Handler: index.lambda_handler
       MemorySize: 128
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 900
       Role: !GetAtt DynamicPipelineCleanupLambdaRole.Arn
       Environment:
@@ -253,8 +254,9 @@ Resources:
       Code:
         ZipFile: |
           import os, boto3, logging, json, signal, traceback
-          from botocore.vendored import requests
+          import urllib3
 
+          http = urllib3.PoolManager()
           logger = logging.getLogger()
           logging.basicConfig()
           LOGGING_LEVEL = os.environ['LOGGING_LEVEL']
@@ -326,8 +328,9 @@ Resources:
                   'content-type': '',
                   'content-length': str(len(response_body))
               }
-              response = requests.put(event['ResponseURL'],
-                                      data=response_body,
+              response = http.request("PUT",
+                                      event['ResponseURL'],
+                                      body=response_body,
                                       headers=headers)
               logger.info("CloudFormation returned status code: " + response.reason)
 
@@ -403,7 +406,7 @@ Resources:
     Properties:
       Handler: index.lambda_handler
       MemorySize: 128
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 900
       Role: !GetAtt DynamicPipelineMakerLambdaRole.Arn
       Environment:
@@ -539,7 +542,7 @@ Resources:
     Properties:
       Handler: index.handler
       Role: !GetAtt CleanUpBucketsLambdaRole.Arn
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 30
       Code:
         ZipFile: |
@@ -594,7 +597,7 @@ Resources:
     Properties:
       Handler: index.handler
       Role: !GetAtt CodecommitCredentialsLambdaRole.Arn
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 30
       Code:
         ZipFile: |
