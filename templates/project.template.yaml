@@ -27,10 +27,6 @@ Parameters:
   CodecommitCredentialsLambdaArn:
     Description: ARN of Lambda function to create credentials for access to CodeCommit
     Type: String
-  BuildImageName:
-    Description: Docker image for application build
-    Type: String
-    Default: aws/codebuild/nodejs:10.1.0
   ArtifactBucket:
     Description: Artifact S3 bucket
     Type: String
@@ -161,7 +157,7 @@ Resources:
     Properties:
       RepositoryName: !Ref AppName
       Triggers:
-        - CustomData: !Sub '{"SecretArnDev": "${SecretDev}","SecretsManagerKey": "${SecretsManagerKey.Arn}","AppName": "${AppName}","BuildImageName": "${BuildImageName}","ArtifactBucket": "${ArtifactBucket}","ArtifactBucketKeyArn": "${ArtifactBucketKeyArn}","SamTranslationBucket": "${SamTranslationBucket}","PipelineServiceRoleArn": "${PipelineServiceRoleArn}","DevAwsAccountId": "${DevAwsAccountId}"}'
+        - CustomData: !Sub '{"SecretArnDev": "${SecretDev}","SecretsManagerKey": "${SecretsManagerKey.Arn}","AppName": "${AppName}","ArtifactBucket": "${ArtifactBucket}","ArtifactBucketKeyArn": "${ArtifactBucketKeyArn}","SamTranslationBucket": "${SamTranslationBucket}","PipelineServiceRoleArn": "${PipelineServiceRoleArn}","DevAwsAccountId": "${DevAwsAccountId}"}'
           DestinationArn: !Ref DynamicPipelineMakerLambdaArn
           Events:
             - createReference
