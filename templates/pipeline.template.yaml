@@ -56,8 +56,10 @@ Parameters:
     Type: String
 
 Mappings:
-  BuildImageName: aws/codebuild/amazonlinux2-aarch64-standard:2.0
-  BuildImageType: ARM_CONTAINER
+  Constants:
+    BuildImage:
+      Name: aws/codebuild/amazonlinux2-aarch64-standard:2.0
+      Type: ARM_CONTAINER
 
 Conditions:
   IsProdStage: !Equals [ !Ref Branch, 'master' ]
@@ -256,8 +258,8 @@ Resources:
         BuildSpec: buildspec.build.yaml
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
-        Type: !FindInMap [BuildImageType]
-        Image: !FindInMap [BuildImageName]
+        Type: !FindInMap [Constants, BuildImage, Type]
+        Image: !FindInMap [Constants, BuildImage, Name]
         EnvironmentVariables:
           - Name: AWS_ACCOUNT_ID
             Value: !Ref AWS::AccountId
@@ -282,8 +284,8 @@ Resources:
         BuildSpec: buildspec.smoketest.yaml
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
-        Type: !FindInMap [BuildImageType]
-        Image: !FindInMap [BuildImageName]
+        Type: !FindInMap [Constants, BuildImage, Type]
+        Image: !FindInMap [Constants, BuildImage, Name]
         EnvironmentVariables:
           - Name: STACK_NAME
             Type: PLAINTEXT
@@ -308,8 +310,8 @@ Resources:
         BuildSpec: buildspec.smoketest.yaml
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
-        Type: !FindInMap [BuildImageType]
-        Image: !FindInMap [BuildImageName]
+        Type: !FindInMap [Constants, BuildImage, Type]
+        Image: !FindInMap [Constants, BuildImage, Name]
         EnvironmentVariables:
           - Name: STACK_NAME
             Type: PLAINTEXT
