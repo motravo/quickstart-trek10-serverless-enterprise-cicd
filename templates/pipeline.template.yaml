@@ -256,7 +256,7 @@ Resources:
         BuildSpec: buildspec.build.yaml
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
-        Type: LINUX_CONTAINER
+        Type: ARM_CONTAINER
         Image: !Ref BuildImageName
         EnvironmentVariables:
           - Name: AWS_ACCOUNT_ID
@@ -282,7 +282,7 @@ Resources:
         BuildSpec: buildspec.smoketest.yaml
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
-        Type: LINUX_CONTAINER
+        Type: ARM_CONTAINER
         Image: !Ref BuildImageName
         EnvironmentVariables:
           - Name: STACK_NAME
@@ -308,7 +308,7 @@ Resources:
         BuildSpec: buildspec.smoketest.yaml
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
-        Type: LINUX_CONTAINER
+        Type: ARM_CONTAINER
         Image: !Ref BuildImageName
         EnvironmentVariables:
           - Name: STACK_NAME
