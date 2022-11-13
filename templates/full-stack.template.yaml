@@ -70,7 +70,7 @@ Parameters:
   QSS3KeyPrefix:
     AllowedPattern: "^[0-9a-zA-Z-/]*$"
     ConstraintDescription: AWS Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/). It cannot start with forward slash (/) because that is automatically appended.
-    Default: quickstart-trek10-serverless-enterprise-cicd-v2/
+    Default: quickstart-trek10-serverless-enterprise-cicd-v3/
     Description: S3 key prefix for the AWS Quick Start assets. AWS Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/). It cannot start with forward slash (/) because that is automatically appended. It will typically end with a forward slash.
     Type: String
   ProdChildAccountRoleName:
